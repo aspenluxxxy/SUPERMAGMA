@@ -1,0 +1,104 @@
+name: "Build"
+on: [push, pull_request]
+jobs:
+    build-windows:
+        name: Build for Windows
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install nightly Rust toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: nightly
+                  profile: minimal
+                  default: true
+            - name: Build for ARM64
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target aarch64-pc-windows-msvc
+            - name: Build for x86_64
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target x86_64-pc-windows-msvc
+            - name: Build for x86
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target i686-pc-windows-msvc
+            - name: Upload ARM64 binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-windows-arm64
+                  path: target/aarch64-pc-windows-msvc/release/supermagma.exe
+                  if-no-files-found: error
+            - name: Upload x86 binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-windows-x86
+                  path: target/i686-pc-windows-msvc/release/supermagma.exe
+                  if-no-files-found: error
+            - name: Upload x86_64 binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-windows-x86_64
+                  path: target/x86_64-pc-windows-msvc/release/supermagma.exe
+                  if-no-files-found: error
+    build-linux:
+        name: Build for Linux
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install nightly Rust toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: nightly
+                  profile: minimal
+                  default: true
+            - name: Build for x86_64
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target x86_64-unknown-linux-gnu
+            - name: Upload x86_64 binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-linux-x86_64
+                  path: target/x86_64-unknown-linux-gnu/release/supermagma
+                  if-no-files-found: error
+    build-macos:
+        name: Build for macOS
+        runs-on: macos-11.0
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install nightly Rust toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: nightly
+                  profile: minimal
+                  default: true
+            - name: Build for ARM64
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target aarch64-apple-darwin
+            - name: Build for x86_64
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release --target x86_64-apple-darwin
+            - name: Create macOS universal binary
+              run: lipo -create target/x86_64-apple-darwin/release/supermagma target/aarch64-apple-darwin/release/supermagma -output supermagma
+            - name: Upload x86_64 binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-macos-intel
+                  path: target/x86_64-apple-darwin/release/supermagma
+                  if-no-files-found: error
+            - name: Upload universal binary
+              uses: actions/upload-artifact@v2
+              with:
+                  name: SuperMAGMA-macos-universal
+                  path: supermagma
+                  if-no-files-found: error
