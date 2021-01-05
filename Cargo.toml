@@ -11,7 +11,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 strum = { version = "0.20", features = ["derive"] }
 nano-leb128 = { version = "0.1", features = ["std_io_ext"] }
-native-dialog = { version = "0.4", features = ["windows_dpi_awareness", "windows_visual_styles"] }
+native-dialog = { version = "0.5", features = ["windows_dpi_awareness", "windows_visual_styles"] }
 color-eyre = "0.5"
 
 [profile.release]
